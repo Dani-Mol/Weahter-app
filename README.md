@@ -1,7 +1,12 @@
 # Weahter-app
-Pagina web que te da la información del clima del aeropuerto de llegada 
 
-Apartado de Como Utilizar Go
+## Descripción del proyecto
+
+Página web que ingresando el nombre de la ciudad, la IATA o el número del ticket, te da la información del clima del aeropuerto de llegada.
+
+## Dependencias de Go
+
+Para emplear el programa, es necesario tener instalado Go y git en su sistema.
 
 Tienen que utilizar un comando para instalar Go
 

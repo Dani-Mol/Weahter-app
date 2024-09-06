@@ -4,7 +4,6 @@ import (
 	"Weahter-app/index/pkg/interfaz"
 
 	"fyne.io/fyne/v2/app"
-	//"fyne.io/fyne/v2/dialog"
 )
 
 // Funcion main unicamente crea la interfaz
@@ -15,4 +14,5 @@ func main() {
 	interfaz.CrearInterfaz(myWindow)
 
 	myWindow.ShowAndRun()
+
 }

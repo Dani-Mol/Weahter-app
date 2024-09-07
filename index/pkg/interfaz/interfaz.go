@@ -43,11 +43,10 @@ func InterfazPrincipal(myWindow fyne.Window, onContinue func()) {
 
 	continuarButton := widget.NewButton("Continuar", func() {
 		if onContinue != nil {
-			onContinue() // Llama a la función de callback cuando el botón se presiona
+			onContinue()
 		}
 	})
 
-	// Crear un contenedor que incluya la etiqueta y el botón
 	botonContenedor := container.NewVBox(
 		continuarButton,
 	)
@@ -60,7 +59,6 @@ func InterfazPrincipal(myWindow fyne.Window, onContinue func()) {
 		imagen,
 	)
 
-	// Configurar el contenido de la ventana
 	myWindow.SetContent(contenedor)
 	size := myWindow.Canvas().Size()
 	imagen.Resize(size)

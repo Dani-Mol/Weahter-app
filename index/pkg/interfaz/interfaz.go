@@ -11,7 +11,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-// En esta funcion se establece la interfaz con los roles de pasajero y servidor
+// En esta funcion se establece la interfaz con el usuario pidiendo un metodo de acceso (Ticket, ita o Ciudad)
 func CrearInterfaz(myWindow fyne.Window) {
 	InterfazPrincipal(myWindow, func() {
 		usuario := &usuarios.Usuario{}
@@ -36,6 +36,8 @@ func CrearInterfaz(myWindow fyne.Window) {
 		myWindow.SetContent(subcategoria)
 	})
 }
+
+// Este metodo establece la pagina principal de la aplicacion
 func InterfazPrincipal(myWindow fyne.Window, onContinue func()) {
 
 	imagen := canvas.NewImageFromFile("/Users/axelgodinez/Documents/Modelado y Programacion/Proyecto 1 - B/Weahter-app/index/pkg/imagenes/Home.png")

@@ -11,7 +11,7 @@ import (
 
 type Usuario struct{}
 
-// Metodo de pasajero para establcer como manejar y valiar el Ticket
+// Metodo de usuario para establcer como manejar y valiar el Ticket conforme la interfaz grafica
 func (u Usuario) ManejarTicket(myWindow fyne.Window, onCancel func()) {
 	openDialogButton := widget.NewButton("Abrir Diálogo", func() {
 		entrada := widget.NewEntry()
@@ -21,6 +21,9 @@ func (u Usuario) ManejarTicket(myWindow fyne.Window, onCancel func()) {
 				ita := entrada.Text
 				fmt.Printf("ITA ingresado: %s\n", ita)
 				dialog.ShowInformation("Ticket válido", fmt.Sprintf("Ita válido: %s", ita), myWindow)
+				if onCancel != nil {
+					onCancel()
+				}
 			} else {
 				dialog.ShowInformation("Gracias", "Gracias por su visita", myWindow)
 				if onCancel != nil {
@@ -32,6 +35,7 @@ func (u Usuario) ManejarTicket(myWindow fyne.Window, onCancel func()) {
 	myWindow.SetContent(openDialogButton)
 }
 
+// // Metodo de usuario para establcer como manejar y valiar el Ita conforme la interfaz grafica
 func (u Usuario) ManejarITA(myWindow fyne.Window, onCancel func()) {
 	openDialogButton := widget.NewButton("Abrir Diálogo", func() {
 		entrada := widget.NewEntry()
@@ -41,6 +45,9 @@ func (u Usuario) ManejarITA(myWindow fyne.Window, onCancel func()) {
 				ita := entrada.Text
 				fmt.Printf("ITA ingresado: %s\n", ita)
 				dialog.ShowInformation("Ticket válido", fmt.Sprintf("Ita válido: %s", ita), myWindow)
+				if onCancel != nil {
+					onCancel()
+				}
 			} else {
 				dialog.ShowInformation("Gracias", "Gracias por su visita", myWindow)
 				if onCancel != nil {
@@ -52,6 +59,7 @@ func (u Usuario) ManejarITA(myWindow fyne.Window, onCancel func()) {
 	myWindow.SetContent(openDialogButton)
 }
 
+// Metodo de usuario para establcer como manejar y valiar la Ciudad conforme la interfaz grafica
 func (U Usuario) ManejarCiudad(myWindow fyne.Window, onCancel func()) {
 	openDialogButton := widget.NewButton("Abrir Diálogo", func() {
 		entrada := widget.NewEntry()
@@ -61,6 +69,9 @@ func (U Usuario) ManejarCiudad(myWindow fyne.Window, onCancel func()) {
 				ciudad := entrada.Text
 				fmt.Printf("Ciudad ingresado: %s\n", ciudad)
 				dialog.ShowInformation("Ticket válido", fmt.Sprintf("Ciudad válido: %s", ciudad), myWindow)
+				if onCancel != nil {
+					onCancel()
+				}
 			} else {
 				dialog.ShowInformation("Gracias", "Gracias por su visita", myWindow)
 				if onCancel != nil {

@@ -2,7 +2,7 @@
 El paquete principal implementa un mecanismo de almacenamiento en caché para datos meteorológicos, utilizando un conjunto de datos CSV de códigos IATA y una API meteorológica.
 Version 1.0
 */
-package main
+package cache
 
 import (
 	"encoding/csv"

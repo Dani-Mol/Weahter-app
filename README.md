@@ -18,4 +18,4 @@ go get fyne.io/fyne/v2 para instalar la biblioteca ocupada
 
 go mod tidy por si tienen que actualizar dependencias
 
-go run interfaz.go para compilar en la carpeta de Go
+go run main.go para compilar en la carpeta de Go

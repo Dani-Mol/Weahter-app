@@ -2,7 +2,7 @@
 El paquete principal implementa un mecanismo de almacenamiento en caché para datos meteorológicos, utilizando un conjunto de datos CSV de códigos IATA y una API meteorológica.
 Version 1.0
 */
-package main
+package cache
 
 import (
 	"encoding/csv"
@@ -29,6 +29,12 @@ var (
 	cacheActive sync.Mutex
 )
 
+// Variable para almacenar la unica instancia de cache
+var (
+	cacheInstance *CacheData
+	once          sync.Once
+)
+
 // El clima representa la estructura de datos meteorológicos recuperada de la API.
 type Weather struct {
 	Climate  string
@@ -44,55 +50,64 @@ type CacheData struct {
 	Records map[string][][]interface{} `json:"records"`
 }
 
+// Inicializa el cache una sola vez sino existe una instancia
+func GetCacheSingleton(reset bool) *CacheData {
+	once.Do(func() {
+		// Inicializa la instancia del caché si no ha sido creada
+		cacheInstance = GetCache(reset)
+	})
+	return cacheInstance
+}
+
 // getCache lee el caché de un archivo JSON o inicializa uno nuevo si es necesario.
 // Si reset es verdadero, borra el caché y comienza de nuevo.
-func getCache(reset bool) *CacheData {
-	var cache CacheData
+func GetCache(reset bool) *CacheData {
+	var cache *CacheData
 	if reset {
 		// Inicializa un nuevo caché si el restablecimiento es verdadero
-		cache = CacheData{Flag: time.Now().Format("2006-01-02 15:04:05"), Records: make(map[string][][]interface{})}
-		saveCache(&cache)
+		cache = &CacheData{Flag: time.Now().Format("2006-01-02 15:04:05"), Records: make(map[string][][]interface{})}
+		SaveCache(cache)
 	} else {
 		// Intenta leer desde el archivo de caché existente
 		data, err := ioutil.ReadFile(JSON_CACHE)
 		if err != nil {
 			// Si falta el archivo, inicializar un nuevo caché
-			cache = CacheData{Flag: time.Now().Format("2006-01-02 15:04:05"), Records: make(map[string][][]interface{})}
-			saveCache(&cache)
+			cache = &CacheData{Flag: time.Now().Format("2006-01-02 15:04:05"), Records: make(map[string][][]interface{})}
+			SaveCache(cache)
 		} else {
 			// Desagrupar datos JSON en la estructura de caché
 			err := json.Unmarshal(data, &cache)
 			if err != nil {
 				// Si los datos están dañados, reinicie la caché
-				cache = CacheData{Flag: time.Now().Format("2006-01-02 15:04:05"), Records: make(map[string][][]interface{})}
-				saveCache(&cache)
+				cache = &CacheData{Flag: time.Now().Format("2006-01-02 15:04:05"), Records: make(map[string][][]interface{})}
+				SaveCache(cache)
 			} else {
 				// Comprueba si el caché ha expirado
-				checkCache(&cache)
+				CheckCache(cache)
 			}
 		}
 	}
-	return &cache
+	return cache
 }
 
 // checkCache verifica si el caché tiene más de 3 horas de antigüedad.
 // Si el caché ha expirado, activa una actualización.
-func checkCache(cache *CacheData) {
+func CheckCache(cache *CacheData) {
 	cacheTime, _ := time.Parse("2006-01-02 15:04:05", cache.Flag)
 	if time.Since(cacheTime) > 3*time.Hour {
-		updateCache()
+		UpdateCache()
 	}
 }
 
 // saveCache escribe los datos de caché en el archivo JSON.
-func saveCache(cache *CacheData) {
+func SaveCache(cache *CacheData) {
 	data, _ := json.Marshal(cache)
 	_ = ioutil.WriteFile(JSON_CACHE, data, 0644)
 }
 
 // iataRegistration lee los códigos IATA y sus coordenadas (latitud, longitud) de un conjunto de datos CSV.
 // Devuelve un mapa con los códigos IATA como claves y sus coordenadas como valores.
-func iataRegistration() map[string][2]float64 {
+func IataRegistration() map[string][2]float64 {
 	iatas := make(map[string][2]float64)
 	file, err := os.Open(DATA_SET)
 	if err != nil {
@@ -123,7 +138,7 @@ func iataRegistration() map[string][2]float64 {
 
 // getWeather realiza una solicitud a una API meteorológica utilizando latitud y longitud y devuelve una matriz de estructuras meteorológicas.
 // Simula la solicitud de API.
-func getWeather(lat, lon float64) []Weather {
+func (cache CacheData) GetWeather(lat, lon float64) []Weather {
 	url := fmt.Sprintf("https://api.openweathermap.org/data/2.5/forecast?lat=%f&lon=%f&appid=%s", lat, lon, API_KEY)
 	resp, err := http.Get(url)
 	if err != nil {
@@ -139,15 +154,15 @@ func getWeather(lat, lon float64) []Weather {
 
 // updateCache borra el caché actual y lo vuelve a llenar recuperando datos meteorológicos para códigos IATA.
 // Hace una pausa entre solicitudes para evitar exceder los límites de velocidad de la API.
-func updateCache() {
+func UpdateCache() {
 	cacheActive.Lock()
 	defer cacheActive.Unlock()
 
-	iatas := iataRegistration()
-	cache := getCache(true)
+	iatas := IataRegistration()
+	cache := GetCacheSingleton(true)
 
 	for iata, coords := range iatas {
-		weatherData := getWeather(coords[0], coords[1])
+		weatherData := cache.GetWeather(coords[0], coords[1])
 		cache.Records[iata] = [][]interface{}{}
 
 		// Append weather data to cache
@@ -157,37 +172,37 @@ func updateCache() {
 		time.Sleep(1 * time.Second) // Throttle requests to avoid exceeding API rate limits
 	}
 
-	saveCache(cache)
-	startTimer()
+	SaveCache(cache)
+	StartTimer()
 }
 
 // startTimer inicia un temporizador en segundo plano que activa actualizaciones de caché cada 3 horas.
-func startTimer() {
+func StartTimer() {
 	go func() {
 		timerActive.Lock()
 		defer timerActive.Unlock()
 		for {
 			time.Sleep(3 * time.Hour)
-			updateCache()
+			UpdateCache()
 		}
 	}()
 }
 
 // runCache inicializa el proceso de caché cuando se inicia el programa.
 // Si la caché está vacía, activa una actualización. De lo contrario, inicia el temporizador de actualización periódica.
-func runCache() {
+func RunCache() {
 	timerActive.Lock()
 	defer timerActive.Unlock()
 
-	cache := getCache(false)
+	cache := GetCacheSingleton(false)
 	if len(cache.Records) == 0 {
-		updateCache()
+		UpdateCache()
 	} else {
-		startTimer()
+		StartTimer()
 	}
 }
 
 // main es el punto de entrada del programa. Inicia el proceso de caché.
 func main() {
-	runCache()
+	RunCache()
 }

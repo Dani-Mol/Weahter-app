@@ -1,6 +1,7 @@
 package main
 
 import (
+	"Weahter-app/index/pkg/cache"
 	"Weahter-app/index/pkg/interfaz"
 
 	"fyne.io/fyne/v2"
@@ -9,6 +10,7 @@ import (
 
 // Funcion main unicamente crea la interfaz
 func main() {
+	cache.RunCache()
 	myApp := app.New()
 	myWindow := myApp.NewWindow("Mi Aplicación")
 

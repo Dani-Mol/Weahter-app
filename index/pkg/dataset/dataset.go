@@ -97,49 +97,49 @@ func (dm *DatasetManager) readNames() {
 // Filtra los nombres válidos
 func (dm *DatasetManager) filterValidNames() {
 	for _, name := range dm.NamesList {
-		if dm.isValidIATA(name) || dm.isValidIATA(dm.Names[name]) {
+		if dm.IsValidIATA(name) || dm.IsValidIATA(dm.Names[name]) {
 			dm.ValidNames = append(dm.ValidNames, name)
 		}
 	}
 }
 
 // Obtención de coordenadas por código IATA
-func (dm *DatasetManager) getCoords(iata string) (coords [2]float64, exists bool) {
+func (dm *DatasetManager) GetCoords(iata string) (coords [2]float64, exists bool) {
 	coords, exists = dm.Coords[iata]
 	return
 }
 
 // Obtención de códigos IATA por ticket
-func (dm *DatasetManager) getIATAs(ticket string) (iatas [2]string, exists bool) {
+func (dm *DatasetManager) GetIATAs(ticket string) (iatas [2]string, exists bool) {
 	iatas, exists = dm.Iatas[ticket]
 	return
 }
 
 // Verificación de si un código IATA es válido
-func (dm *DatasetManager) isValidIATA(iata string) bool {
+func (dm *DatasetManager) IsValidIATA(iata string) bool {
 	_, exists := dm.Coords[iata]
 	return exists
 }
 
 // Obtención de la lista de nombres
-func (dm *DatasetManager) getNamesList() []string {
+func (dm *DatasetManager) GetNamesList() []string {
 	return dm.NamesList
 }
 
 // Obtención del código IATA por nombre
-func (dm *DatasetManager) getIATA(name string) (iata string) {
+func (dm *DatasetManager) GetIATA(name string) (iata string) {
 	return dm.Names[name]
 }
 
 // Obtención de la lista de códigos IATA válidos
-func (dm *DatasetManager) getValidNamesList() []string {
+func (dm *DatasetManager) GetValidNamesList() []string {
 	return dm.ValidNames
 }
 
 // Ejemplo de uso
 func main() {
 	datasetManager := NewDatasetManager()
-	fmt.Println("Lista de nombres:", datasetManager.getNamesList())
-	coords, _ := datasetManager.getCoords("JFK")
+	fmt.Println("Lista de nombres:", datasetManager.GetNamesList())
+	coords, _ := datasetManager.GetCoords("JFK")
 	fmt.Println("Coordenadas para un IATA específico:", coords)
 }

@@ -1,4 +1,4 @@
-package main
+package searcher
 
 import (
 	"encoding/csv"
@@ -15,7 +15,7 @@ import (
 const datasetPath = "dataset/dataset.csv"
 
 // Función que genera un mapa con los tickets y sus IATA asociados
-func obtenerTickets() (map[string][]string, error) {
+func ObtenerTickets() (map[string][]string, error) {
 	registros := make(map[string][]string)
 	file, err := os.Open(datasetPath)
 	if err != nil {
@@ -37,7 +37,7 @@ func obtenerTickets() (map[string][]string, error) {
 }
 
 // Función que obtiene los datos del caché (simulación)
-func obtenerCache() map[string][][]string {
+func ObtenerCache() map[string][][]string {
 	return map[string][][]string{
 		"ABC": {{"Soleado", "30°C", "15°C", "40%"}},
 		"XYZ": {{"Lluvioso", "22°C", "18°C", "60%"}},
@@ -45,7 +45,7 @@ func obtenerCache() map[string][][]string {
 }
 
 // Función que toma datos del caché y los formatea
-func tomarDelCache(tickets map[string][]string, cache map[string][][]string, origen, destino string) ([]string, error) {
+func TomarDelCache(tickets map[string][]string, cache map[string][][]string, origen, destino string) ([]string, error) {
 	var datos []string
 	_ = time.Now().Hour()
 
@@ -66,14 +66,14 @@ func tomarDelCache(tickets map[string][]string, cache map[string][][]string, ori
 }
 
 // Función que busca en el caché utilizando Levenshtein
-func buscarEnCache(texto string) [][]string {
-	tickets, err := obtenerTickets()
+func BuscarEnCache(texto string) [][]string {
+	tickets, err := ObtenerTickets()
 	if err != nil {
 		fmt.Println("Error obteniendo tickets:", err)
 		return nil
 	}
 
-	cache := obtenerCache()
+	cache := ObtenerCache()
 	var resultados [][]string
 
 	// Normaliza el texto de entrada
@@ -82,7 +82,7 @@ func buscarEnCache(texto string) [][]string {
 	// Busca por ticket
 	for ticket, info := range tickets {
 		if strings.Contains(strings.ToLower(ticket), textoNormalizado) {
-			resultado, _ := tomarDelCache(tickets, cache, info[0], info[1])
+			resultado, _ := TomarDelCache(tickets, cache, info[0], info[1])
 			resultados = append(resultados, resultado)
 		}
 	}
@@ -94,7 +94,7 @@ func buscarEnCache(texto string) [][]string {
 			destino := strings.ToLower(info[1])
 
 			if strings.Contains(origen, textoNormalizado) || strings.Contains(destino, textoNormalizado) {
-				resultado, _ := tomarDelCache(tickets, cache, info[0], info[1])
+				resultado, _ := TomarDelCache(tickets, cache, info[0], info[1])
 				resultados = append(resultados, resultado)
 			}
 		}
@@ -116,7 +116,7 @@ func buscarEnCache(texto string) [][]string {
 		}
 
 		if mejorCoincidencia != "" {
-			resultado, _ := tomarDelCache(tickets, cache, mejorCoincidencia, tickets[mejorCoincidencia][1])
+			resultado, _ := TomarDelCache(tickets, cache, mejorCoincidencia, tickets[mejorCoincidencia][1])
 			resultados = append(resultados, resultado)
 		}
 	}

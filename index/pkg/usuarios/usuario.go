@@ -6,48 +6,16 @@ import (
 	"strings"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
+	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
 
 type Usuario struct{}
 
-// Metodo de usuario para establcer como manejar y valiar el Ticket conforme la interfaz grafica
-/*
-func (u Usuario) ManejarTicket(myWindow fyne.Window, onCancel func()) {
-
-	var mostrarTicket func()
-
-	mostrarTicket = func() {
-		entrada := widget.NewEntry()
-		dialogo := dialog.NewCustomConfirm("Ingrese Ticket", "Aceptar", "Cancelar", entrada, func(confirmacion bool) {
-			if confirmacion {
-				ita := entrada.Text
-				climaticket, error := clima.ObtenerClimaTicket(ita)
-				if error != nil {
-					dialog.ShowError(fmt.Errorf("ticket no válido"), myWindow)
-					mostrarTicket()
-					return
-				}
-				fmt.Printf("Ticket: %s\n", climaticket.Ticket)
-			} else {
-				dialog.ShowInformation("Gracias", "Gracias por su visita", myWindow)
-				return
-			}
-			if onCancel != nil {
-				onCancel()
-			}
-		}, myWindow)
-
-		dialogo.Show()
-	}
-	mostrarTicket()
-
-
-}*/
-
-// // Metodo de usuario para establcer como manejar y valiar el Ita conforme la interfaz grafica
+// Metodo de usuario para establcer como manejar y valiar el Ita conforme la interfaz grafica
 func (u Usuario) ManejarITA(myWindow fyne.Window, onCancel func()) {
 	var mostrarIta func()
 
@@ -58,11 +26,10 @@ func (u Usuario) ManejarITA(myWindow fyne.Window, onCancel func()) {
 				ita := entrada.Text
 				climaciudad, err := clima.ObtenerClimaIta(ita)
 				if err != nil {
-					//dialog.ShowError(err, myWindow) // Muestra el error
-					mostrarIta() // Muestra el diálogo nuevamente para reingresar el ticket
+					mostrarIta() // Muestra el diálogo nuevamente para reingresar la Ita
 				} else {
-					// Ticket válido, manejar aquí la lógica necesaria
-					fmt.Printf("Ticket válido: %s\n", climaciudad.Ciudad)
+					// Ita válido
+					crearInterfazClima(myWindow, climaciudad)
 					if onCancel != nil {
 						onCancel()
 					}
@@ -79,7 +46,7 @@ func (u Usuario) ManejarITA(myWindow fyne.Window, onCancel func()) {
 	}
 
 	// Botón para abrir el diálogo
-	abrirDialogo := widget.NewButton("Abrir Diálogo de Ticket", func() {
+	abrirDialogo := widget.NewButton("Abrir Diálogo de Ita", func() {
 		mostrarIta()
 	})
 
@@ -97,11 +64,10 @@ func (U Usuario) ManejarCiudad(myWindow fyne.Window, onCancel func()) {
 				ita := entrada.Text
 				climaciudad, err := clima.ObtenerClimaCiudad(ita)
 				if err != nil {
-					//dialog.ShowError(err, myWindow) // Muestra el error
 					mostrarCiudad()
 				} else {
-					// Ticket válido
-					fmt.Printf("Ciudad válido: %s\n", climaciudad.Ciudad)
+					// Ciudad válido
+					crearInterfazClima(myWindow, climaciudad)
 					if onCancel != nil {
 						onCancel()
 					}
@@ -138,11 +104,10 @@ func (u Usuario) ManejarTicket(myWindow fyne.Window, onCancel func()) {
 				ita := entrada.Text
 				climaticket, err := clima.ObtenerClimaTicket(ita)
 				if err != nil {
-					//dialog.ShowError(err, myWindow) // Muestra el error
 					mostrarTicket()
 				} else {
 					// Ticket válido
-					fmt.Printf("Ticket válido: %s\n", climaticket.Destino)
+					crearInterfazTicketClima(myWindow, climaticket)
 					if onCancel != nil {
 						onCancel()
 					}
@@ -164,9 +129,89 @@ func (u Usuario) ManejarTicket(myWindow fyne.Window, onCancel func()) {
 
 	myWindow.SetContent(container.NewVBox(abrirDialogo))
 }
+func crearInterfazTicketClima(myWindow fyne.Window, ticketClima *clima.TicketClima) {
+	titulos := canvas.NewText("Detalles del Ticket", theme.Color(theme.ColorNameForeground))
+	titulos.TextStyle = fyne.TextStyle{Bold: true}
+	titulos.TextSize = 24
+	ticketCard := widget.NewCard(
+		"Ticket",
+		ticketClima.Ticket,
+		widget.NewLabel("Informacion del ticket y destinos"),
+	)
+
+	//Clima de Origen
+	origenCard := widget.NewCard(
+		"Clima en "+ticketClima.Origen,
+		"",
+		container.NewVBox(
+			widget.NewLabel(fmt.Sprintf("Coordenadas Origen: [%.4f, %.4f]", ticketClima.CoordenadasOrigen[0], ticketClima.CoordenadasOrigen[1])),
+			widget.NewLabel("Clima: "+ticketClima.ClimaOrigen.Climate),
+			widget.NewLabel(fmt.Sprintf("Temperatura: %d - %d°C", ticketClima.ClimaOrigen.TempMin, ticketClima.ClimaOrigen.TempMax)),
+			widget.NewLabel(fmt.Sprintf("Humedad: %d%%", ticketClima.ClimaOrigen.Humidity)),
+			widget.NewLabel(fmt.Sprintf("Hora: %d:00", ticketClima.ClimaOrigen.Hour)),
+		),
+	)
+	//Clima de Destino
+	destinoCard := widget.NewCard(
+		"Clima en "+ticketClima.Destino,
+		"",
+		container.NewVBox(
+			widget.NewLabel(fmt.Sprintf("Coordenadas Destino: [%.4f, %.4f]", ticketClima.CoordenadasDestino[0], ticketClima.CoordenadasDestino[1])),
+			widget.NewLabel("Clima: "+ticketClima.ClimaDestino.Climate),
+			widget.NewLabel(fmt.Sprintf("Temperatura: %d - %d°C", ticketClima.ClimaDestino.TempMin, ticketClima.ClimaDestino.TempMax)),
+			widget.NewLabel(fmt.Sprintf("Humedad: %d%%", ticketClima.ClimaDestino.Humidity)),
+			widget.NewLabel(fmt.Sprintf("Hora: %d:00", ticketClima.ClimaDestino.Hour)),
+		),
+	)
+
+	// Contenedor principal con espaciado adecuado entre elementos
+	content := container.NewVBox(
+		titulos,
+		ticketCard,
+		widget.NewSeparator(),
+		origenCard,
+		widget.NewSeparator(),
+		destinoCard,
+	)
+	myWindow.SetContent(content)
+
+}
+func crearInterfazClima(myWindow fyne.Window, clima *clima.CiudadClima) {
+	titulos := canvas.NewText("Detalles del Clima", theme.Color(theme.ColorNameForeground))
+	titulos.TextStyle = fyne.TextStyle{Bold: true}
+	titulos.TextSize = 24
+	ciudadCard := widget.NewCard(
+		"Ciudad y/o Ita",
+		clima.Ciudad,
+		widget.NewLabel("Informacion de la Ciudad"),
+	)
+
+	//Clima
+	climaCard := widget.NewCard(
+		"Clima en "+clima.Ciudad,
+		"",
+		container.NewVBox(
+			widget.NewLabel("Clima: "+clima.Clima.Climate),
+			widget.NewLabel(fmt.Sprintf("Temperatura: %d - %d°C", clima.Clima.TempMin, clima.Clima.TempMax)),
+			widget.NewLabel(fmt.Sprintf("Humedad: %d%%", clima.Clima.Humidity)),
+			widget.NewLabel(fmt.Sprintf("Hora: %d:00", clima.Clima.Hour)),
+		),
+	)
+
+	// Contenedor principal con espaciado adecuado entre elementos
+	content := container.NewVBox(
+		titulos,
+		ciudadCard,
+		widget.NewSeparator(),
+		climaCard,
+		widget.NewSeparator(),
+	)
+	myWindow.SetContent(content)
+
+}
 
 /*
-Establecer el retiorno de la estructura de clima
+Establecer el retorno de la estructura de clima
 Hacer dos metodos para retornar el clima uno para ticket y otra de ciuidad y ita
 Revisar que no se regresen resultados en nil en el segundo valor de la variable para segurar que todo esta bien
 

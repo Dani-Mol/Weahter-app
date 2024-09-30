@@ -2,12 +2,10 @@ package interfaz
 
 import (
 	"Weahter-app/index/pkg/usuarios"
-	"fmt"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
 )
 
@@ -31,7 +29,6 @@ func CrearInterfaz(myWindow fyne.Window) {
 					CrearInterfaz(myWindow)
 				})
 			}
-			dialog.ShowInformation("Selección realizada", fmt.Sprintf("Seleccionaste: %s", ingreso), myWindow)
 		})
 		myWindow.SetContent(subcategoria)
 	})
